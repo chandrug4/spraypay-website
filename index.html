@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spray-Pay — Luxury Fragrance Vending</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Raleway:wght@200;300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #C9A84C; --gold-light: #E8CC7A; --gold-dim: #8A6E2F;
+      --black: #080807; --black-soft: #111110; --black-card: #141413;
+      --black-border: #1E1E1C; --white: #F5F0E8; --white-dim: #A89F8C;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--black); color: var(--white); font-family: 'Raleway', sans-serif; font-weight: 300; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 9999; opacity: .4; }
+
+    /* NAV */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; align-items: center; justify-content: space-between; padding: 1.4rem 4rem; background: linear-gradient(to bottom, rgba(8,8,7,.97), transparent); backdrop-filter: blur(4px); }
+    .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; letter-spacing: .25em; color: var(--gold); text-decoration: none; }
+    .nav-logo span { color: var(--white); }
+    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+    .nav-links a { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--white-dim); text-decoration: none; transition: color .3s; }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-cta { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; border: 1px solid var(--gold); color: var(--gold); padding: .55rem 1.4rem; text-decoration: none; transition: background .3s, color .3s; }
+    .nav-cta:hover { background: var(--gold); color: var(--black); }
+
+    /* BUTTONS */
+    .btn-primary { background: var(--gold); color: var(--black); padding: .85rem 2.2rem; font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; text-decoration: none; font-weight: 500; transition: background .3s, transform .2s; display: inline-block; border: none; cursor: pointer; font-family: 'Raleway', sans-serif; }
+    .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-ghost { color: var(--white-dim); font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; text-decoration: none; padding: .85rem 1.5rem; border: 1px solid var(--black-border); transition: border-color .3s, color .3s; display: inline-block; cursor: pointer; background: none; font-family: 'Raleway', sans-serif; }
+    .btn-ghost:hover { border-color: var(--gold-dim); color: var(--white); }
+
+    /* HERO */
+    #hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 6rem 2rem 4rem; }
+    .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 70% 50%, rgba(201,168,76,.09) 0%, transparent 70%), radial-gradient(ellipse 40% 60% at 20% 60%, rgba(201,168,76,.05) 0%, transparent 60%), var(--black); }
+    .hero-line { position: absolute; top: 0; left: 50%; width: 1px; height: 100%; background: linear-gradient(to bottom, transparent, rgba(201,168,76,.15), transparent); }
+    .hero-inner { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; max-width: 1200px; width: 100%; }
+    .hero-text { animation: fadeUp .9s ease both; }
+    .hero-eyebrow { font-size: .68rem; letter-spacing: .35em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.6rem; display: flex; align-items: center; gap: 1rem; }
+    .hero-eyebrow::before { content: ''; display: block; width: 40px; height: 1px; background: var(--gold); }
+    .hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 5.5vw, 5.5rem); font-weight: 300; line-height: 1.05; color: var(--white); margin-bottom: 1.8rem; }
+    .hero-title em { font-style: italic; color: var(--gold); }
+    .hero-sub { font-size: .88rem; line-height: 1.9; color: var(--white-dim); max-width: 440px; margin-bottom: 2.8rem; }
+    .hero-actions { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; }
+    .gold-divider { width: 60px; height: 1px; background: var(--gold); margin: 1.4rem 0; }
+
+    /* MACHINE */
+    .hero-visual { display: flex; justify-content: center; align-items: center; position: relative; animation: fadeUp .9s .2s ease both; }
+    .machine-frame { width: 280px; height: 460px; background: linear-gradient(160deg, #1a1a18, #0e0e0c); border: 1px solid var(--black-border); border-radius: 4px; position: relative; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(201,168,76,.08); }
+    .machine-frame::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(201,168,76,.06) 0%, transparent 50%); }
+    .machine-top { height: 50px; background: linear-gradient(to bottom, #1e1e1b, #161614); border-bottom: 1px solid rgba(201,168,76,.2); display: flex; align-items: center; justify-content: center; }
+    .machine-logo-sm { font-family: 'Cormorant Garamond', serif; font-size: .75rem; letter-spacing: .2em; color: var(--gold); }
+    .machine-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 16px; }
+    .bottle-slot { aspect-ratio: 1; background: var(--black-soft); border: 1px solid var(--black-border); border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; position: relative; overflow: hidden; }
+    .bottle-slot::after { content: attr(data-label); font-size: .44rem; letter-spacing: .1em; text-transform: uppercase; color: var(--white-dim); position: absolute; bottom: 3px; }
+    .bottle-svg { width: 26px; opacity: .7; }
+    .machine-screen { margin: 4px 16px; background: #0a0a09; border: 1px solid rgba(201,168,76,.15); height: 54px; border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+    .screen-text { font-size: .58rem; letter-spacing: .25em; color: var(--gold); text-transform: uppercase; }
+    .screen-sub { font-size: .48rem; letter-spacing: .1em; color: var(--white-dim); }
+    .machine-pay { margin: 8px 16px; background: var(--gold); height: 36px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--black); font-weight: 500; }
+    .machine-vent { position: absolute; bottom: 0; left: 0; right: 0; height: 36px; background: linear-gradient(to top, #0e0e0c, transparent); display: flex; align-items: flex-end; padding: 6px 16px; justify-content: space-between; }
+    .vent-line { height: 2px; flex: 1; background: var(--black-border); margin: 0 2px; }
+    .glow-ring { position: absolute; width: 600px; height: 600px; border-radius: 50%; border: 1px solid rgba(201,168,76,.06); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: pulse 4s ease-in-out infinite; }
+    .glow-ring:nth-child(2) { width: 480px; height: 480px; animation-delay: .7s; opacity: .7; }
+    .glow-ring:nth-child(3) { width: 360px; height: 360px; animation-delay: 1.4s; opacity: .5; }
+
+    /* STATS */
+    .stats-bar { border-top: 1px solid var(--black-border); border-bottom: 1px solid var(--black-border); padding: 2.4rem 4rem; display: flex; justify-content: center; }
+    .stat-item { flex: 1; max-width: 220px; text-align: center; padding: 0 2rem; border-right: 1px solid var(--black-border); }
+    .stat-item:last-child { border-right: none; }
+    .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 2.6rem; font-weight: 300; color: var(--gold); line-height: 1; }
+    .stat-label { font-size: .65rem; letter-spacing: .2em; text-transform: uppercase; color: var(--white-dim); margin-top: .4rem; }
+
+    /* SECTION BASE */
+    section { padding: 7rem 4rem; }
+    .section-eyebrow { font-size: .65rem; letter-spacing: .35em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; }
+    .section-eyebrow::before { content: ''; display: block; width: 30px; height: 1px; background: var(--gold); }
+    .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 4vw, 3.6rem); font-weight: 300; line-height: 1.1; color: var(--white); }
+    .section-title em { font-style: italic; color: var(--gold); }
+
+    /* ABOUT */
+    #about { background: var(--black-soft); position: relative; overflow: hidden; }
+    #about::before { content: ''; position: absolute; top: 0; left: 0; width: 500px; height: 500px; background: radial-gradient(ellipse at top left, rgba(201,168,76,.05), transparent 70%); }
+    .about-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
+    .about-lead { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 300; color: var(--white); line-height: 1.7; margin: 1.6rem 0 1.2rem; }
+    .about-body { font-size: .85rem; line-height: 1.9; color: var(--white-dim); margin-bottom: 1rem; }
+    .about-values { margin-top: 2.4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .value-item { padding: 1.2rem; border: 1px solid var(--black-border); background: var(--black-card); }
+    .value-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--gold); margin-bottom: .3rem; }
+    .value-desc { font-size: .72rem; color: var(--white-dim); line-height: 1.6; }
+    .about-stat-cards { display: flex; flex-direction: column; gap: 1.5rem; }
+    .about-stat-card { padding: 2rem; border: 1px solid var(--black-border); background: var(--black-card); border-left: 3px solid var(--gold); }
+    .about-stat-num { font-family: 'Cormorant Garamond', serif; font-size: 3rem; color: var(--gold); font-weight: 300; line-height: 1; }
+    .about-stat-label { font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; color: var(--white-dim); margin-top: .3rem; }
+    .about-stat-desc { font-size: .78rem; color: var(--white-dim); line-height: 1.6; margin-top: .6rem; }
+
+    /* HOW IT WORKS */
+    #how-it-works { background: var(--black); position: relative; overflow: hidden; }
+    #how-it-works::before { content: ''; position: absolute; top: 0; right: 0; width: 500px; height: 500px; background: radial-gradient(ellipse at top right, rgba(201,168,76,.06), transparent 70%); }
+    .how-inner { max-width: 1200px; margin: 0 auto; }
+    .how-header { margin-bottom: 4.5rem; }
+    .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--black-border); border: 1px solid var(--black-border); }
+    .step-card { background: var(--black-card); padding: 2.8rem 2rem; position: relative; overflow: hidden; transition: background .3s; }
+    .step-card:hover { background: #161615; }
+    .step-num { font-family: 'Cormorant Garamond', serif; font-size: 4.5rem; font-weight: 300; color: rgba(201,168,76,.12); line-height: 1; position: absolute; top: 1.2rem; right: 1.6rem; }
+    .step-icon { width: 44px; height: 44px; margin-bottom: 1.6rem; border: 1px solid rgba(201,168,76,.25); display: flex; align-items: center; justify-content: center; color: var(--gold); }
+    .step-icon svg { width: 20px; height: 20px; }
+    .step-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; color: var(--white); margin-bottom: .7rem; }
+    .step-desc { font-size: .8rem; line-height: 1.8; color: var(--white-dim); }
+
+    /* FRAGRANCES */
+    #fragrances { background: var(--black-soft); }
+    .frag-inner { max-width: 1200px; margin: 0 auto; }
+    .frag-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4rem; }
+    .frag-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+    .frag-card { background: var(--black-card); border: 1px solid var(--black-border); overflow: hidden; transition: border-color .3s, transform .3s; }
+    .frag-card:hover { border-color: rgba(201,168,76,.3); transform: translateY(-4px); }
+    .frag-img-wrap { height: 200px; background: linear-gradient(135deg, #131312, #0d0d0c); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    .frag-img-wrap::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(201,168,76,.08), transparent 70%); }
+    .bottle-art { position: relative; z-index: 1; }
+    .bottle-art svg { filter: drop-shadow(0 8px 24px rgba(201,168,76,.2)); }
+    .frag-body { padding: 1.4rem; }
+    .frag-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 400; color: var(--white); margin-bottom: .3rem; }
+    .frag-note { font-size: .72rem; color: var(--gold); letter-spacing: .1em; margin-bottom: .6rem; }
+    .frag-desc { font-size: .75rem; line-height: 1.7; color: var(--white-dim); margin-bottom: 1rem; }
+    .frag-price { display: flex; justify-content: space-between; align-items: center; }
+    .price-tag { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: var(--gold); }
+    .frag-badge { font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; padding: .25rem .6rem; border: 1px solid rgba(201,168,76,.3); color: var(--gold-dim); }
+
+    /* LOCATIONS */
+    #locations { background: var(--black); }
+    .loc-inner { max-width: 1200px; margin: 0 auto; }
+    .loc-header { margin-bottom: 4rem; }
+    .loc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .loc-card { border: 1px solid var(--black-border); padding: 2rem; background: var(--black-card); position: relative; overflow: hidden; transition: border-color .3s; }
+    .loc-card:hover { border-color: rgba(201,168,76,.3); }
+    .loc-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, var(--gold), transparent); opacity: 0; transition: opacity .3s; }
+    .loc-card:hover::before { opacity: 1; }
+    .loc-type { font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
+    .loc-name { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 400; color: var(--white); margin-bottom: .4rem; }
+    .loc-addr { font-size: .78rem; color: var(--white-dim); line-height: 1.6; margin-bottom: 1.2rem; }
+    .loc-hours { font-size: .72rem; color: var(--white-dim); padding-top: 1.2rem; border-top: 1px solid var(--black-border); display: flex; justify-content: space-between; align-items: center; }
+    .loc-status { display: inline-flex; align-items: center; gap: .4rem; font-size: .65rem; letter-spacing: .1em; color: #6fcf97; }
+    .loc-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #6fcf97; box-shadow: 0 0 6px #6fcf97; }
+
+    /* CONTACT */
+    #contact { padding: 7rem 4rem; background: var(--black-soft); border-top: 1px solid var(--black-border); position: relative; overflow: hidden; }
+    #contact::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 800px; height: 400px; background: radial-gradient(ellipse, rgba(201,168,76,.06), transparent 70%); }
+    .contact-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; }
+    .contact-left p { font-size: .85rem; color: var(--white-dim); line-height: 1.9; margin-bottom: 1.4rem; }
+    .contact-details { display: flex; flex-direction: column; gap: 1rem; margin-top: .6rem; }
+    .contact-detail { display: flex; align-items: flex-start; gap: 1rem; }
+    .contact-detail-icon { width: 36px; height: 36px; border: 1px solid rgba(201,168,76,.25); display: flex; align-items: center; justify-content: center; color: var(--gold); flex-shrink: 0; }
+    .contact-detail-icon svg { width: 16px; height: 16px; }
+    .contact-detail-text { font-size: .8rem; color: var(--white-dim); line-height: 1.6; }
+    .contact-detail-text strong { display: block; font-size: .65rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); margin-bottom: .2rem; font-weight: 400; }
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-input, .form-textarea, .form-select { background: var(--black); border: 1px solid var(--black-border); color: var(--white); padding: .85rem 1.2rem; font-family: 'Raleway', sans-serif; font-size: .8rem; outline: none; transition: border-color .3s; width: 100%; }
+    .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--gold-dim); }
+    .form-input::placeholder, .form-textarea::placeholder { color: var(--white-dim); }
+    .form-select option { background: var(--black-card); }
+    .form-textarea { resize: vertical; min-height: 120px; }
+
+    /* FOOTER */
+    footer { background: var(--black); border-top: 1px solid var(--black-border); padding: 4rem 4rem 2rem; }
+    .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4rem; margin-bottom: 3rem; }
+    .footer-brand-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--gold); letter-spacing: .25em; margin-bottom: 1rem; }
+    .footer-brand-logo span { color: var(--white-dim); }
+    .footer-brand-desc { font-size: .78rem; color: var(--white-dim); line-height: 1.8; max-width: 280px; }
+    .footer-col-title { font-size: .65rem; letter-spacing: .25em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.4rem; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: .7rem; }
+    .footer-col a { font-size: .78rem; color: var(--white-dim); text-decoration: none; transition: color .3s; }
+    .footer-col a:hover { color: var(--gold); }
+    .footer-col button { font-size: .78rem; color: var(--white-dim); background: none; border: none; cursor: pointer; font-family: 'Raleway', sans-serif; font-weight: 300; padding: 0; text-align: left; transition: color .3s; }
+    .footer-col button:hover { color: var(--gold); }
+    .footer-bottom { border-top: 1px solid var(--black-border); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .footer-copy { font-size: .65rem; color: #4a4a46; letter-spacing: .1em; }
+    .footer-legal-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .footer-legal-links button { font-size: .65rem; color: #4a4a46; background: none; border: none; cursor: pointer; font-family: 'Raleway', sans-serif; letter-spacing: .1em; transition: color .3s; }
+    .footer-legal-links button:hover { color: var(--gold); }
+
+    /* LEGAL MODAL */
+    .legal-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(8,8,7,.92); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .4s ease; padding: 2rem; }
+    .legal-overlay.active { opacity: 1; pointer-events: all; }
+    .legal-modal { background: var(--black-card); border: 1px solid rgba(201,168,76,.2); width: 100%; max-width: 720px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 40px 80px rgba(0,0,0,.8); transform: translateY(20px); transition: transform .4s ease; }
+    .legal-overlay.active .legal-modal { transform: translateY(0); }
+    .legal-modal-header { padding: 2rem 2.4rem 1.4rem; border-bottom: 1px solid var(--black-border); display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0; }
+    .legal-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; color: var(--white); }
+    .legal-modal-subtitle { font-size: .65rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); margin-top: .3rem; }
+    .legal-close { background: none; border: none; color: var(--white-dim); font-size: 1.2rem; cursor: pointer; padding: .2rem; transition: color .2s; line-height: 1; }
+    .legal-close:hover { color: var(--gold); }
+    .legal-modal-body { padding: 2rem 2.4rem; overflow-y: auto; flex: 1; }
+    .legal-modal-body::-webkit-scrollbar { width: 4px; }
+    .legal-modal-body::-webkit-scrollbar-track { background: var(--black); }
+    .legal-modal-body::-webkit-scrollbar-thumb { background: var(--gold-dim); }
+    .legal-section { margin-bottom: 2rem; }
+    .legal-section h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--gold); font-weight: 400; margin-bottom: .7rem; }
+    .legal-section p { font-size: .82rem; color: var(--white-dim); line-height: 1.85; margin-bottom: .6rem; }
+    .legal-section ul { padding-left: 1.2rem; display: flex; flex-direction: column; gap: .5rem; }
+    .legal-section ul li { font-size: .82rem; color: var(--white-dim); line-height: 1.7; }
+    .legal-section strong { color: var(--white); font-weight: 500; }
+    .legal-updated { font-size: .68rem; color: #4a4a46; letter-spacing: .1em; margin-bottom: 2rem; padding-bottom: 1.4rem; border-bottom: 1px solid var(--black-border); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%,100% { opacity: .4; transform: translate(-50%,-50%) scale(1); } 50% { opacity: .15; transform: translate(-50%,-50%) scale(1.04); } }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .float { animation: float 5s ease-in-out infinite; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) { .footer-top { grid-template-columns: 1fr 1fr; gap: 2.5rem; } }
+    @media (max-width: 960px) {
+      nav { padding: 1.2rem 2rem; } .nav-links { display: none; }
+      section { padding: 5rem 2rem; } #contact { padding: 5rem 2rem; }
+      .hero-inner, .about-inner, .contact-inner { grid-template-columns: 1fr; }
+      .hero-eyebrow { justify-content: center; } .hero-inner { text-align: center; }
+      .hero-sub { margin: 0 auto 2.4rem; } .hero-actions { justify-content: center; }
+      .hero-visual { display: none; }
+      .steps-grid, .frag-grid { grid-template-columns: 1fr 1fr; }
+      .loc-grid { grid-template-columns: 1fr 1fr; }
+      .about-inner, .contact-inner { gap: 3rem; }
+      .stats-bar { padding: 2rem; flex-wrap: wrap; } .stat-item { border-right: none; }
+    }
+    @media (max-width: 600px) {
+      nav { padding: 1rem 1.5rem; }
+      .steps-grid, .frag-grid, .loc-grid { grid-template-columns: 1fr; }
+      .about-values, .form-row { grid-template-columns: 1fr; }
+      footer { padding: 3rem 1.5rem 1.5rem; } .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LEGAL MODAL -->
+<div class="legal-overlay" id="legalOverlay">
+  <div class="legal-modal">
+    <div class="legal-modal-header">
+      <div>
+        <div class="legal-modal-title" id="legalTitle"></div>
+        <div class="legal-modal-subtitle">Spray-Pay · Official Document</div>
+      </div>
+      <button class="legal-close" onclick="closeLegal()">✕</button>
+    </div>
+    <div class="legal-modal-body" id="legalBody"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">SPRAY<span>-</span>PAY</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#fragrances">Fragrances</a></li>
+    <li><a href="#locations">Locations</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Partner With Us</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-line"></div>
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-eyebrow">Luxury Fragrance on Demand</div>
+      <h1 class="hero-title">Scent the<br/><em>Moment,</em><br/>Anywhere.</h1>
+      <div class="gold-divider"></div>
+      <p class="hero-sub">Premium perfume vending machines placed at India's finest venues. One tap, one spray — signature luxury in seconds.</p>
+      <div class="hero-actions">
+        <a href="#fragrances" class="btn-primary">Explore Fragrances</a>
+        <a href="#locations" class="btn-ghost">Find a Machine</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="glow-ring"></div><div class="glow-ring"></div><div class="glow-ring"></div>
+      <div class="machine-frame float">
+        <div class="machine-top"><span class="machine-logo-sm">SPRAY-PAY</span></div>
+        <div class="machine-grid">
+          <div class="bottle-slot" data-label="Oud"><svg class="bottle-svg" viewBox="0 0 40 60" fill="none"><rect x="14" y="4" width="12" height="6" rx="1" fill="#C9A84C" opacity=".6"/><path d="M10 16 Q8 20 8 28 L8 52 Q8 56 12 56 L28 56 Q32 56 32 52 L32 28 Q32 20 30 16 Z" fill="#1a1a18" stroke="#C9A84C" stroke-width=".8"/><rect x="14" y="10" width="12" height="6" rx="1" fill="#111" stroke="#C9A84C" stroke-width=".6"/></svg></div>
+          <div class="bottle-slot" data-label="Rose"><svg class="bottle-svg" viewBox="0 0 40 60" fill="none"><ellipse cx="20" cy="36" rx="12" ry="18" fill="#1a1a18" stroke="#C9A84C" stroke-width=".8"/><rect x="16" y="12" width="8" height="10" rx="1" fill="#111" stroke="#C9A84C" stroke-width=".6"/><rect x="18" y="8" width="4" height="5" rx="1" fill="#C9A84C" opacity=".7"/></svg></div>
+          <div class="bottle-slot" data-label="Musk"><svg class="bottle-svg" viewBox="0 0 40 60" fill="none"><rect x="10" y="20" width="20" height="34" rx="3" fill="#1a1a18" stroke="#C9A84C" stroke-width=".8"/><rect x="14" y="12" width="12" height="10" rx="1" fill="#111" stroke="#C9A84C" stroke-width=".6"/><rect x="17" y="8" width="6" height="5" rx="1" fill="#C9A84C" opacity=".6"/></svg></div>
+          <div class="bottle-slot" data-label="Amber"><svg class="bottle-svg" viewBox="0 0 40 60" fill="none"><path d="M14 20 L26 20 L30 54 L10 54 Z" fill="#1a1a18" stroke="#C9A84C" stroke-width=".8"/><rect x="15" y="12" width="10" height="9" rx="1" fill="#111" stroke="#C9A84C" stroke-width=".6"/><rect x="18" y="8" width="4" height="5" rx="1" fill="#C9A84C" opacity=".6"/></svg></div>
+          <div class="bottle-slot" data-label="Iris"><svg class="bottle-svg" viewBox="0 0 40 60" fill="none"><ellipse cx="20" cy="40" rx="10" ry="16" fill="#1a1a18" stroke="#C9A84C" stroke-width=".8"/><rect x="17" y="14" width="6" height="12" rx="1" fill="#111" stroke="#C9A84C" stroke-width=".6"/><rect x="18.5" y="9" width="3" height="6" rx="1" fill="#C9A84C" opacity=".7"/></svg></div>
+          <div class="bottle-slot" data-label="Cedar"><svg class="bottle-svg" viewBox="0 0 40 60" fill="none"><rect x="8" y="18" width="24" height="36" rx="4" fill="#1a1a18" stroke="#C9A84C" stroke-width=".8"/><rect x="15" y="10" width="10" height="10" rx="1" fill="#111" stroke="#C9A84C" stroke-width=".6"/><rect x="17" y="6" width="6" height="5" rx="1" fill="#C9A84C" opacity=".6"/></svg></div>
+          <div class="bottle-slot" data-label="Neroli"><svg class="bottle-svg" viewBox="0 0 40 60" fill="none"><path d="M12 22 Q10 28 10 36 L10 50 Q10 54 14 54 L26 54 Q30 54 30 50 L30 36 Q30 28 28 22 Z" fill="#1a1a18" stroke="#C9A84C" stroke-width=".8"/><rect x="15" y="12" width="10" height="11" rx="1" fill="#111" stroke="#C9A84C" stroke-width=".6"/></svg></div>
+          <div class="bottle-slot" data-label="Saffron"><svg class="bottle-svg" viewBox="0 0 40 60" fill="none"><rect x="11" y="20" width="18" height="34" rx="2" fill="#1a1a18" stroke="#C9A84C" stroke-width=".8"/><ellipse cx="20" cy="20" rx="9" ry="4" fill="#1a1a18" stroke="#C9A84C" stroke-width=".6"/><rect x="18.5" y="6" width="3" height="4" rx="1" fill="#C9A84C" opacity=".6"/></svg></div>
+          <div class="bottle-slot" data-label="Vetiver"><svg class="bottle-svg" viewBox="0 0 40 60" fill="none"><path d="M20 54 L10 34 L14 18 L26 18 L30 34 Z" fill="#1a1a18" stroke="#C9A84C" stroke-width=".8"/><rect x="16" y="10" width="8" height="9" rx="1" fill="#111" stroke="#C9A84C" stroke-width=".6"/><rect x="18" y="6" width="4" height="5" rx="1" fill="#C9A84C" opacity=".7"/></svg></div>
+        </div>
+        <div class="machine-screen">
+          <div class="screen-text">Select Fragrance</div>
+          <div class="screen-sub">Tap · Pay · Spray</div>
+        </div>
+        <div class="machine-pay">Pay &amp; Spray</div>
+        <div class="machine-vent"><div class="vent-line"></div><div class="vent-line"></div><div class="vent-line"></div><div class="vent-line"></div><div class="vent-line"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num">4+</div><div class="stat-label">Premium Fragrances</div></div>
+  <div class="stat-item"><div class="stat-num">₹40</div><div class="stat-label">Starting Per Spray</div></div>
+  <div class="stat-item"><div class="stat-num">UPI</div><div class="stat-label">Contactless Payment</div></div>
+  <div class="stat-item"><div class="stat-num">24/7</div><div class="stat-label">Always Available</div></div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-inner">
+    <div>
+      <div class="section-eyebrow">Who We Are</div>
+      <h2 class="section-title">Redefining <em>Fragrance</em> Access</h2>
+      <p class="about-lead">Spray-Pay was born from a simple belief — luxury fragrance should be accessible to everyone, everywhere.</p>
+      <p class="about-body">We design and operate smart, self-service fragrance vending machines placed at premium venues. Our machines feature physical scent-test buttons, an intuitive quantity selector, and seamless UPI payments — making premium perfume available 24/7 without counters or salespeople.</p>
+      <p class="about-body">Starting from Pondicherry, we're building India's first network of automated fragrance kiosks for malls, hotels, offices, and events. Every spray is precision-dosed, contactless, and affordable — luxury on your terms.</p>
+      <div class="about-values">
+        <div class="value-item"><div class="value-title">✦ Authenticity</div><div class="value-desc">Every fragrance is sourced from authorised distributors and certified genuine.</div></div>
+        <div class="value-item"><div class="value-title">✦ Innovation</div><div class="value-desc">Proprietary dispensing technology for precise, consistent delivery every time.</div></div>
+        <div class="value-item"><div class="value-title">✦ Luxury</div><div class="value-desc">From the machine aesthetic to the scent selection — every detail is premium.</div></div>
+        <div class="value-item"><div class="value-title">✦ Convenience</div><div class="value-desc">Contactless payments, 24/7 availability, no queues, no minimum purchase.</div></div>
+      </div>
+    </div>
+    <div class="about-stat-cards">
+      <div class="about-stat-card">
+        <div class="about-stat-num">2025</div>
+        <div class="about-stat-label">Year Founded</div>
+        <div class="about-stat-desc">Founded in Pondicherry with a mission to democratise luxury fragrance access across India.</div>
+      </div>
+      <div class="about-stat-card">
+        <div class="about-stat-num">₹40</div>
+        <div class="about-stat-label">Starting Price Per Spray</div>
+        <div class="about-stat-desc">Accessible luxury pricing — designer fragrance experiences starting from just ₹40 per spray.</div>
+      </div>
+      <div class="about-stat-card">
+        <div class="about-stat-num">100%</div>
+        <div class="about-stat-label">Authentic Fragrances</div>
+        <div class="about-stat-desc">All fragrances are original, sealed, and sourced directly from certified brand distributors.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="how-inner">
+    <div class="how-header">
+      <div class="section-eyebrow">The Experience</div>
+      <h2 class="section-title">How <em>Spray-Pay</em> Works</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
+        <h3 class="step-title">Discover</h3>
+        <p class="step-desc">Walk up to the machine and explore our curated selection of premium fragrances. Each scent has a physical test button — press it to sample.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+        <h3 class="step-title">Select & Customise</h3>
+        <p class="step-desc">Choose your number of sprays with the intuitive touchscreen. Watch the animated bottle fill up as you dial in the perfect amount.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
+        <h3 class="step-title">Pay via UPI</h3>
+        <p class="step-desc">Scan the generated QR code with any UPI app — PhonePe, Google Pay, Paytm, or your bank app. Instant, secure, contactless payment.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l14 9-14 9V3z"/></svg></div>
+        <h3 class="step-title">Spray</h3>
+        <p class="step-desc">Your premium fragrance is dispensed automatically with precision timing. Enjoy a lasting, all-day scent in seconds.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FRAGRANCES -->
+<section id="fragrances">
+  <div class="frag-inner">
+    <div class="frag-header">
+      <div>
+        <div class="section-eyebrow">Curated Collection</div>
+        <h2 class="section-title">Featured <em>Fragrances</em></h2>
+      </div>
+      <a href="#contact" class="btn-ghost">Enquire About Stock</a>
+    </div>
+    <div class="frag-grid">
+      <div class="frag-card">
+        <div class="frag-img-wrap"><div class="bottle-art"><svg width="80" height="130" viewBox="0 0 80 130" fill="none"><rect x="28" y="8" width="24" height="14" rx="2" fill="#1a1a18" stroke="#C9A84C" stroke-width="1"/><rect x="34" y="2" width="12" height="8" rx="2" fill="#C9A84C" opacity=".8"/><rect x="16" y="30" width="48" height="88" rx="6" fill="#1a1a18" stroke="#C9A84C" stroke-width="1.2"/><rect x="16" y="22" width="48" height="12" rx="3" fill="#111" stroke="#C9A84C" stroke-width="1"/><rect x="22" y="52" width="36" height="42" rx="2" fill="none" stroke="#a1a1aa" stroke-width=".5" opacity=".4"/><text x="40" y="78" text-anchor="middle" font-family="serif" font-size="6.5" fill="#a1a1aa" opacity=".9" font-style="italic">Midnight</text><text x="40" y="89" text-anchor="middle" font-family="sans-serif" font-size="4.5" fill="#71717a" letter-spacing="2">ONYX</text></svg></div></div>
+        <div class="frag-body">
+          <div class="frag-note">Dark · Woody · Intense</div>
+          <div class="frag-name">Midnight Onyx</div>
+          <div class="frag-desc">A deep, mysterious blend of smoky oud and sandalwood — commanding presence for those who leave a lasting impression.</div>
+          <div class="frag-price"><span class="price-tag">from ₹40</span><span class="frag-badge">Bestseller</span></div>
+        </div>
+      </div>
+      <div class="frag-card">
+        <div class="frag-img-wrap"><div class="bottle-art"><svg width="80" height="130" viewBox="0 0 80 130" fill="none"><ellipse cx="40" cy="80" rx="22" ry="36" fill="#1a1a18" stroke="#C9A84C" stroke-width="1.2"/><rect x="32" y="26" width="16" height="22" rx="2" fill="#111" stroke="#C9A84C" stroke-width="1"/><rect x="35" y="18" width="10" height="10" rx="2" fill="#C9A84C" opacity=".7"/><ellipse cx="40" cy="80" rx="11" ry="20" stroke="#3b82f6" stroke-width=".4" opacity=".4"/><text x="40" y="78" text-anchor="middle" font-family="serif" font-size="6.5" fill="#3b82f6" opacity=".9" font-style="italic">Azure</text><text x="40" y="89" text-anchor="middle" font-family="sans-serif" font-size="4" fill="#2563eb" letter-spacing="2">BREEZE</text></svg></div></div>
+        <div class="frag-body">
+          <div class="frag-note">Fresh · Aquatic · Clean</div>
+          <div class="frag-name">Azure Breeze</div>
+          <div class="frag-desc">A crisp, invigorating wave of ocean air and cool citrus — refreshing energy for any moment of the day.</div>
+          <div class="frag-price"><span class="price-tag">from ₹40</span><span class="frag-badge">Refreshing</span></div>
+        </div>
+      </div>
+      <div class="frag-card">
+        <div class="frag-img-wrap"><div class="bottle-art"><svg width="80" height="130" viewBox="0 0 80 130" fill="none"><rect x="18" y="36" width="44" height="76" rx="4" fill="#1a1a18" stroke="#C9A84C" stroke-width="1.2"/><rect x="28" y="18" width="24" height="20" rx="2" fill="#111" stroke="#C9A84C" stroke-width="1"/><rect x="33" y="10" width="14" height="10" rx="2" fill="#C9A84C" opacity=".7"/><line x1="18" y1="64" x2="62" y2="64" stroke="#f43f5e" stroke-width=".5" opacity=".4"/><text x="40" y="82" text-anchor="middle" font-family="serif" font-size="6.5" fill="#f43f5e" opacity=".9" font-style="italic">Rose</text><text x="40" y="94" text-anchor="middle" font-family="sans-serif" font-size="4" fill="#e11d48" letter-spacing="2">VELVET</text></svg></div></div>
+        <div class="frag-body">
+          <div class="frag-note">Floral · Romantic · Warm</div>
+          <div class="frag-name">Rose Velvet</div>
+          <div class="frag-desc">Velvety Bulgarian rose with a soft trail of musk and amber — impossibly romantic, elegantly feminine.</div>
+          <div class="frag-price"><span class="price-tag">from ₹40</span><span class="frag-badge">Elegant</span></div>
+        </div>
+      </div>
+      <div class="frag-card">
+        <div class="frag-img-wrap"><div class="bottle-art"><svg width="80" height="130" viewBox="0 0 80 130" fill="none"><path d="M26 40 L54 40 L60 112 L20 112 Z" fill="#1a1a18" stroke="#C9A84C" stroke-width="1.2"/><rect x="30" y="20" width="20" height="22" rx="2" fill="#111" stroke="#C9A84C" stroke-width="1"/><rect x="34" y="12" width="12" height="10" rx="2" fill="#C9A84C" opacity=".7"/><rect x="28" y="60" width="24" height="30" rx="2" fill="none" stroke="#6366f1" stroke-width=".5" opacity=".4"/><text x="40" y="78" text-anchor="middle" font-family="serif" font-size="6.5" fill="#6366f1" opacity=".9" font-style="italic">Savage</text><text x="40" y="90" text-anchor="middle" font-family="sans-serif" font-size="4" fill="#4f46e5" letter-spacing="2">BLUE</text></svg></div></div>
+        <div class="frag-body">
+          <div class="frag-note">Fresh · Spicy · Masculine</div>
+          <div class="frag-name">Savage Blue</div>
+          <div class="frag-desc">Intense Calabrian bergamot and sharp pepper with a powerful ambroxan dry-down — bold, versatile, unforgettable.</div>
+          <div class="frag-price"><span class="price-tag">from ₹50</span><span class="frag-badge">New Arrival</span></div>
+        </div>
+      </div>
+    </div>
+<section id="locations">
+  <div class="loc-inner">
+    <div class="loc-header">
+      <div class="section-eyebrow">Find Us</div>
+      <h2 class="section-title">Machine <em>Locations</em></h2>
+    </div>
+    <div class="loc-grid">
+      <div class="loc-card"><div class="loc-type">✦ Launching Soon · Pondicherry</div><div class="loc-name">Pilot Location</div><div class="loc-addr">Our first machine is being deployed<br/>in Pondicherry, India</div><div class="loc-hours"><span>Coming Soon</span><span class="loc-status" style="color:var(--gold-dim);">Setting Up</span></div></div>
+      <div class="loc-card"><div class="loc-type">✦ Expansion · Malls</div><div class="loc-name">Shopping Malls</div><div class="loc-addr">Premium mall deployments planned<br/>across Pondicherry &amp; Tamil Nadu</div><div class="loc-hours"><span>Planned</span><a href="#contact" style="font-size:.65rem;color:var(--gold);letter-spacing:.1em;text-decoration:none;">Enquire Now →</a></div></div>
+      <div class="loc-card"><div class="loc-type">✦ Expansion · Hotels</div><div class="loc-name">Luxury Hotels</div><div class="loc-addr">Partnering with premium hotels<br/>to bring Spray-Pay to guest lobbies</div><div class="loc-hours"><span>Planned</span><a href="#contact" style="font-size:.65rem;color:var(--gold);letter-spacing:.1em;text-decoration:none;">Enquire Now →</a></div></div>
+      <div class="loc-card"><div class="loc-type">✦ Expansion · Events</div><div class="loc-name">Events &amp; Conventions</div><div class="loc-addr">Pop-up fragrance experiences<br/>for weddings, expos &amp; corporate events</div><div class="loc-hours"><span>Available for Booking</span><a href="#contact" style="font-size:.65rem;color:var(--gold);letter-spacing:.1em;text-decoration:none;">Enquire Now →</a></div></div>
+      <div class="loc-card"><div class="loc-type">✦ Expansion · Offices</div><div class="loc-name">Corporate Offices</div><div class="loc-addr">Elevate your workplace with<br/>premium fragrance access for employees</div><div class="loc-hours"><span>Planned</span><a href="#contact" style="font-size:.65rem;color:var(--gold);letter-spacing:.1em;text-decoration:none;">Enquire Now →</a></div></div>
+      <div class="loc-card"><div class="loc-type">✦ Your Venue Here</div><div class="loc-name">Partner With Us</div><div class="loc-addr">We place, stock, and maintain every machine at no cost to you. Earn a revenue share.</div><div class="loc-hours"><span>Nationwide Expansion</span><a href="#contact" style="font-size:.65rem;color:var(--gold);letter-spacing:.1em;text-decoration:none;">Enquire Now →</a></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner">
+    <div class="contact-left">
+      <div class="section-eyebrow">Work With Us</div>
+      <h2 class="section-title" style="margin-bottom:1.4rem;">Partner With <em>Spray-Pay</em></h2>
+      <p>We place, stock, and maintain every machine at absolutely no cost to you. You earn a competitive revenue share while elevating your venue's guest experience effortlessly.</p>
+      <p>Whether you run a hotel, airport, mall, event space, or premium office — we would love to bring the Spray-Pay experience to your guests.</p>
+      <div class="contact-details">
+        <div class="contact-detail">
+          <div class="contact-detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+          <div class="contact-detail-text"><strong>Email</strong>hello@spraypay.in</div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg></div>
+          <div class="contact-detail-text"><strong>Phone</strong>+91 79042 48784</div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+          <div class="contact-detail-text"><strong>Headquarters</strong>Pondicherry, India</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="contact-form">
+        <div class="form-row">
+          <input class="form-input" type="text" placeholder="Your Name"/>
+          <input class="form-input" type="text" placeholder="Business Name"/>
+        </div>
+        <div class="form-row">
+          <input class="form-input" type="email" placeholder="Email Address"/>
+          <input class="form-input" type="tel" placeholder="Phone Number"/>
+        </div>
+        <select class="form-select">
+          <option value="" disabled selected>Venue Type</option>
+          <option>Airport / Transit Hub</option>
+          <option>Luxury Hotel</option>
+          <option>Shopping Mall</option>
+          <option>Event / Convention Centre</option>
+          <option>Spa / Wellness Centre</option>
+          <option>Corporate Office</option>
+          <option>Other</option>
+        </select>
+        <input class="form-input" type="text" placeholder="Venue Location / City"/>
+        <textarea class="form-textarea" placeholder="Tell us about your venue and enquiry…"></textarea>
+        <button class="btn-primary" style="width:100%;">Submit Enquiry</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand-logo">SPRAY<span>-PAY</span></div>
+      <p class="footer-brand-desc">India's premier luxury perfume vending machine company. Bringing premium fragrance experiences to the world's finest venues.</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Navigation</div>
+      <ul>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#fragrances">Fragrances</a></li>
+        <li><a href="#locations">Locations</a></li>
+        <li><a href="#contact">Partner With Us</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Legal</div>
+      <ul>
+        <li><button onclick="openLegal('privacy')">Privacy Policy</button></li>
+        <li><button onclick="openLegal('terms')">Terms &amp; Conditions</button></li>
+        <li><button onclick="openLegal('refund')">Refund Policy</button></li>
+        <li><button onclick="openLegal('disclaimer')">Disclaimer</button></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Contact</div>
+      <ul>
+        <li><a href="mailto:hello@spraypay.in">hello@spraypay.in</a></li>
+        <li><a href="mailto:support@spraypay.in">support@spraypay.in</a></li>
+        <li><a href="mailto:legal@spraypay.in">legal@spraypay.in</a></li>
+        <li><a href="tel:+917904248784">+91 79042 48784</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 Spray-Pay. All rights reserved. Registered in India.</div>
+    <div class="footer-legal-links">
+      <button onclick="openLegal('privacy')">Privacy Policy</button>
+      <button onclick="openLegal('terms')">Terms &amp; Conditions</button>
+      <button onclick="openLegal('refund')">Refund Policy</button>
+      <button onclick="openLegal('disclaimer')">Disclaimer</button>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const legalContent = {
+    privacy: {
+      title: 'Privacy Policy', updated: 'Last Updated: 1 January 2026',
+      html: `
+        <div class="legal-section"><h3>1. Introduction</h3><p>Spray-Pay ("we", "our", or "us") is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you interact with our vending machines, website, and services. By using our services, you consent to the practices described in this policy.</p></div>
+        <div class="legal-section"><h3>2. Information We Collect</h3><p>We may collect the following types of information:</p><ul><li><strong>Transaction Data:</strong> Payment method type, transaction amount, timestamp, and machine location. We do not store full card numbers or CVV codes.</li><li><strong>Usage Data:</strong> Fragrance selections and machine interaction logs used for inventory management and analytics.</li><li><strong>Contact Information:</strong> Name, email, phone, and business details submitted via our enquiry form.</li><li><strong>Technical Data:</strong> IP address, browser type, and operating system when you access our website.</li></ul></div>
+        <div class="legal-section"><h3>3. How We Use Your Information</h3><ul><li>To process payments securely through certified payment gateways.</li><li>To respond to partnership and business enquiries promptly.</li><li>To improve machine performance and fragrance selection through anonymised analytics.</li><li>To send promotional communications only if you have explicitly opted in.</li><li>To comply with applicable Indian laws and regulatory requirements.</li></ul></div>
+        <div class="legal-section"><h3>4. Data Sharing & Disclosure</h3><p>We do not sell, trade, or rent your personal data. We may share data with certified payment processors (PCI-DSS compliant); venue partners (aggregated and anonymised data only); and legal authorities when required by Indian law or court order.</p></div>
+        <div class="legal-section"><h3>5. Data Retention</h3><p>Transaction data is retained for 7 years as required under Indian tax law. Contact form data is retained for 2 years. You may request deletion of your personal data by writing to <strong>legal@spraypay.in</strong>.</p></div>
+        <div class="legal-section"><h3>6. Data Security</h3><p>We implement SSL/TLS encryption, secure payment tokenisation, regular security audits, and restricted data access controls. No method of electronic transmission is 100% secure.</p></div>
+        <div class="legal-section"><h3>7. Your Rights</h3><p>Under applicable Indian data protection law, you have the right to access, correct, restrict, or request deletion of your personal data. Contact us at <strong>legal@spraypay.in</strong>. We will respond within 30 days.</p></div>
+        <div class="legal-section"><h3>8. Cookies</h3><p>Our website uses essential cookies to ensure proper functionality. We do not use tracking or advertising cookies without your consent.</p></div>
+        <div class="legal-section"><h3>9. Contact</h3><p>Data Protection Officer: <strong>legal@spraypay.in</strong><br/>Spray-Pay, Pondicherry, India — 605001</p></div>`
+    },
+    terms: {
+      title: 'Terms & Conditions', updated: 'Last Updated: 1 January 2026',
+      html: `
+        <div class="legal-section"><h3>1. Acceptance of Terms</h3><p>By accessing our website or using Spray-Pay vending machines, you agree to be legally bound by these Terms & Conditions. If you do not agree to all the terms, you must not use our services.</p></div>
+        <div class="legal-section"><h3>2. Our Services</h3><p>Spray-Pay operates automated fragrance vending machines at partner venues across India. All fragrances dispensed are genuine, sourced exclusively from authorised distributors, and sealed until dispensed.</p></div>
+        <div class="legal-section"><h3>3. Payments & Pricing</h3><ul><li>All prices are displayed on the machine screen before purchase confirmation.</li><li>Prices are inclusive of applicable GST unless stated otherwise.</li><li>Payments are processed via certified third-party payment gateways compliant with PCI-DSS standards.</li><li>Spray-Pay does not store any card credentials, PINs, or payment information.</li><li>Prices may vary by location and are subject to change without prior notice.</li></ul></div>
+        <div class="legal-section"><h3>4. Use of Machines</h3><ul><li>Users must be 18 years of age or older to make a purchase.</li><li>Do not tamper with, damage, obstruct, or manipulate any machine.</li><li>Spray-Pay is not responsible for allergic reactions — please review fragrance notes before use.</li><li>Each dispensed spray is final. Re-sprays are not available for the same transaction.</li></ul></div>
+        <div class="legal-section"><h3>5. Intellectual Property</h3><p>All content on this website including logos, design, text, and software is the exclusive property of Spray-Pay, protected under the Indian Copyright Act, 1957. Unauthorised reproduction or distribution is strictly prohibited.</p></div>
+        <div class="legal-section"><h3>6. Limitation of Liability</h3><p>To the fullest extent permitted by law, Spray-Pay shall not be liable for any indirect, incidental, or consequential damages. Our maximum liability shall not exceed the value of the specific transaction in question.</p></div>
+        <div class="legal-section"><h3>7. Governing Law</h3><p>These Terms are governed by the laws of India. Disputes shall be subject to the exclusive jurisdiction of courts in Pondicherry, India.</p></div>
+        <div class="legal-section"><h3>8. Amendments</h3><p>Spray-Pay reserves the right to modify these Terms at any time. Continued use after changes constitutes acceptance of the updated Terms.</p></div>
+        <div class="legal-section"><h3>9. Contact</h3><p>Legal enquiries: <strong>legal@spraypay.in</strong></p></div>`
+    },
+    refund: {
+      title: 'Refund Policy', updated: 'Last Updated: 1 January 2026',
+      html: `
+        <div class="legal-section"><h3>1. General Policy</h3><p>Due to the hygienic and perishable nature of fragrance dispensing, all sales through Spray-Pay vending machines are generally final. Once a fragrance has been successfully dispensed, we are unable to offer a refund or exchange.</p></div>
+        <div class="legal-section"><h3>2. Eligible Refund Situations</h3><p>Refunds will be considered only in the following verified situations:</p><ul><li><strong>Double Charge:</strong> Payment was debited more than once for a single transaction.</li><li><strong>Payment Deducted, No Spray:</strong> Payment was processed but the machine failed to dispense.</li><li><strong>Verified Machine Malfunction:</strong> A confirmed technical fault resulted in failed or incomplete service.</li></ul></div>
+        <div class="legal-section"><h3>3. How to Raise a Refund Request</h3><p>Contact us within <strong>48 hours</strong> at <strong>support@spraypay.in</strong> with: date, time, and location of the transaction; transaction ID or payment reference; proof of payment; and description of the issue.</p></div>
+        <div class="legal-section"><h3>4. Refund Processing</h3><p>All refund requests are reviewed within 2 business days. Approved refunds are processed within <strong>5–7 business days</strong> to the original payment method.</p></div>
+        <div class="legal-section"><h3>5. Non-Refundable Situations</h3><ul><li>Dissatisfaction with the scent after a successful spray.</li><li>Allergic or skin reactions (fragrance notes are shown before every purchase).</li><li>Requests submitted after 48 hours of the transaction.</li><li>Requests without valid transaction proof.</li></ul></div>
+        <div class="legal-section"><h3>6. Contact</h3><p>Refund enquiries: <strong>support@spraypay.in</strong> | <strong>+91 79042 48784</strong></p></div>`
+    },
+    disclaimer: {
+      title: 'Disclaimer', updated: 'Last Updated: 1 January 2026',
+      html: `
+        <div class="legal-section"><h3>1. General Disclaimer</h3><p>Information on this website is provided for general informational and business purposes only. Spray-Pay makes no warranties about the completeness, accuracy, or suitability of any information provided.</p></div>
+        <div class="legal-section"><h3>2. Fragrance & Allergy Disclaimer</h3><p>Fragrances contain natural and synthetic compounds that may cause allergic reactions in certain individuals. Spray-Pay strongly advises all users to review fragrance notes before use, consult a medical professional if you have known sensitivities, and discontinue use immediately if irritation occurs. Spray-Pay shall not be held liable for any adverse reactions from fragrances dispensed by our machines.</p></div>
+        <div class="legal-section"><h3>3. Product Authenticity</h3><p>All fragrances are sourced from authorised brand distributors and are guaranteed 100% authentic. Any authenticity concern will be thoroughly investigated. Please contact <strong>support@spraypay.in</strong> with your transaction details.</p></div>
+        <div class="legal-section"><h3>4. Service Availability</h3><p>Spray-Pay does not guarantee uninterrupted machine availability. Machines may be temporarily offline for maintenance or restocking. We aim to resolve reported issues within 24 hours.</p></div>
+        <div class="legal-section"><h3>5. Third-Party Links</h3><p>Our website may contain links to third-party websites for informational purposes. Spray-Pay accepts no responsibility for their content or practices. The inclusion of any link does not imply endorsement.</p></div>
+        <div class="legal-section"><h3>6. Website Accuracy</h3><p>Fragrance availability, pricing, and machine locations displayed on this website are subject to change. Always confirm current details at the machine display or by contacting us directly.</p></div>
+        <div class="legal-section"><h3>7. Contact</h3><p>For concerns: <strong>legal@spraypay.in</strong><br/>Spray-Pay, Pondicherry, India — 605001</p></div>`
+    }
+  };
+
+  function openLegal(type) {
+    const c = legalContent[type];
+    document.getElementById('legalTitle').textContent = c.title;
+    document.getElementById('legalBody').innerHTML = `<div class="legal-updated">${c.updated}</div>` + c.html;
+    document.getElementById('legalOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('legalBody').scrollTop = 0;
+  }
+
+  function closeLegal() {
+    document.getElementById('legalOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('legalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeLegal();
+  });
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLegal(); });
+</script>
+</body>
+</html>
